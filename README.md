@@ -27,7 +27,7 @@ creation and management of guest virtual machines. Because this set of APIs
 is designed to be generic, we intended to support (over time) the following
 different guest virtual machine types:
 
-- VM applications (think [ls](https://en.wikipedia.org/wiki/Ls) running in it's own virtual machine, with no OS)
+- VM applications (think [LibVMI](http://libvmi.com/) in a VM with no OS)
 - Unikernels (e.g. [IncludeOS](http://www.includeos.org))
 - PV Kernels (e.g. modified Linux kernel)
 - Thick VMs (e.g. unmodified Windows, Linux, BSD, etc...)
