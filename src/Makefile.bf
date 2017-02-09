@@ -1,5 +1,5 @@
 #
-# Bareflank Hypervisor Examples
+# Bareflank Hyperkernel
 #
 # Copyright (C) 2015 Assured Information Security, Inc.
 # Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -23,7 +23,20 @@
 # Subdirs
 ################################################################################
 
+PARENT_SUBDIRS += domain
+PARENT_SUBDIRS += domain_factory
+PARENT_SUBDIRS += entry
 PARENT_SUBDIRS += exit_handler
+PARENT_SUBDIRS += process
+PARENT_SUBDIRS += process_factory
+PARENT_SUBDIRS += process_list
+PARENT_SUBDIRS += process_list_factory
+PARENT_SUBDIRS += scheduler
+PARENT_SUBDIRS += scheduler_factory
+PARENT_SUBDIRS += task
+PARENT_SUBDIRS += thread
+PARENT_SUBDIRS += thread_factory
+PARENT_SUBDIRS += vcpu
 PARENT_SUBDIRS += vcpu_factory
 PARENT_SUBDIRS += vmcall_policy
 PARENT_SUBDIRS += vmcs

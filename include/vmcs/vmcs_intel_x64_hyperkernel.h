@@ -1,5 +1,5 @@
 //
-// Bareflank Hypervisor Examples
+// Bareflank Hyperkernel
 //
 // Copyright (C) 2015 Assured Information Security, Inc.
 // Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -24,7 +24,12 @@
 
 #include <gsl/gsl>
 
+#include <coreid.h>
+#include <vcpuid.h>
 #include <vmcs/vmcs_intel_x64_eapis.h>
+
+class process_list;
+class domain_intel_x64;
 
 class vmcs_intel_x64_hyperkernel : public vmcs_intel_x64_eapis
 {
@@ -35,7 +40,11 @@ public:
     /// @expects
     /// @ensures
     ///
-    vmcs_intel_x64_hyperkernel();
+    vmcs_intel_x64_hyperkernel(
+        coreid::type coreid,
+        vcpuid::type vcpuid,
+        gsl::not_null<process_list *> proclt,
+        gsl::not_null<domain_intel_x64 *> domain);
 
     /// Destructor
     ///
@@ -43,6 +52,58 @@ public:
     /// @ensures
     ///
     ~vmcs_intel_x64_hyperkernel() override  = default;
+
+    /// Get Core ID
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the core id associated with this vmcs
+    ///
+    virtual coreid::type coreid() const
+    { return m_coreid; }
+
+    /// Get vCPU ID
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the vcpu id associated with this vmcs
+    ///
+    virtual vcpuid::type vcpuid() const
+    { return m_vcpuid; }
+
+    /// Get Process List
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the process list associated with this vmcs
+    ///
+    virtual gsl::not_null<process_list *> get_proclt() const
+    { return m_proclt; }
+
+    /// Get Domain
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the domain associated with this vmcs
+    ///
+    virtual gsl::not_null<domain_intel_x64 *> get_domain() const
+    { return m_domain; }
+
+protected:
+
+    void write_fields(gsl::not_null<vmcs_intel_x64_state *> host_state,
+                      gsl::not_null<vmcs_intel_x64_state *> guest_state) override;
+
+private:
+
+    coreid::type m_coreid;
+    vcpuid::type m_vcpuid;
+    gsl::not_null<process_list *> m_proclt;
+    gsl::not_null<domain_intel_x64 *> m_domain;
 
 public:
 

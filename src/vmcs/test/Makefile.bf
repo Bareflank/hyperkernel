@@ -1,5 +1,5 @@
 #
-# Bareflank Hypervisor
+# Bareflank Hyperkernel
 #
 # Copyright (C) 2015 Assured Information Security, Inc.
 # Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -56,20 +56,6 @@ INCLUDE_PATHS+=../../../include
 INCLUDE_PATHS+=%HYPER_ABS%/include/
 INCLUDE_PATHS+=%HYPER_ABS%/bfvmm/include/
 INCLUDE_PATHS+=%HYPER_ABS%/extended_apis/include/
-
-LIBS+=vmcs_intel_x64_hyperkernel
-LIBS+=vmcs_intel_x64_eapis
-LIBS+=vmcs
-LIBS+=exit_handler
-LIBS+=intrinsics
-LIBS+=memory_manager
-
-LIBRARY_PATHS+=%BUILD_REL%/../bin/native
-LIBRARY_PATHS+=%BUILD_ABS%/makefiles/extended_apis/src/vmcs/bin/native
-LIBRARY_PATHS+=%BUILD_ABS%/makefiles/bfvmm/src/vmcs/bin/native
-LIBRARY_PATHS+=%BUILD_ABS%/makefiles/bfvmm/src/exit_handler/bin/native
-LIBRARY_PATHS+=%BUILD_ABS%/makefiles/bfvmm/src/intrinsics/bin/native
-LIBRARY_PATHS+=%BUILD_ABS%/makefiles/bfvmm/src/memory_manager/bin/native
 
 ################################################################################
 # Environment Specific

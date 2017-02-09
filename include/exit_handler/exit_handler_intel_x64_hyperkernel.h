@@ -1,5 +1,5 @@
 //
-// Bareflank Hypervisor Examples
+// Bareflank Hyperkernel
 //
 // Copyright (C) 2015 Assured Information Security, Inc.
 // Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -24,7 +24,16 @@
 
 #include <gsl/gsl>
 
+#include <coreid.h>
+#include <vcpuid.h>
+#include <domainid.h>
+
+#include <vmcs/vmcs_intel_x64_hyperkernel.h>
 #include <exit_handler/exit_handler_intel_x64_eapis.h>
+
+class process_list;
+class domain_intel_x64;
+class process_intel_x64;
 
 class exit_handler_intel_x64_hyperkernel : public exit_handler_intel_x64_eapis
 {
@@ -35,7 +44,11 @@ public:
     /// @expects
     /// @ensures
     ///
-    exit_handler_intel_x64_hyperkernel();
+    exit_handler_intel_x64_hyperkernel(
+        coreid::type coreid,
+        vcpuid::type vcpuid,
+        gsl::not_null<process_list *> proclt,
+        gsl::not_null<domain_intel_x64 *> domain);
 
     /// Destructor
     ///
@@ -43,6 +56,90 @@ public:
     /// @ensures
     ///
     ~exit_handler_intel_x64_hyperkernel() override = default;
+
+    /// Get Core ID
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the core id associated with this exit handler
+    ///
+    virtual coreid::type coreid() const
+    { return m_coreid; }
+
+    /// Get vCPU ID
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the vcpu id associated with this exit handler
+    ///
+    virtual vcpuid::type vcpuid() const
+    { return m_vcpuid; }
+
+    /// Get Process List
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the process list associated with this exit handler
+    ///
+    virtual gsl::not_null<process_list *> get_proclt() const
+    { return m_proclt; }
+
+    /// Get Domain
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return returns the domain associated with this exit handler
+    ///
+    virtual gsl::not_null<domain_intel_x64 *> get_domain() const
+    { return m_domain; }
+
+    /// Set Current Process
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param proc the current process
+    ///
+    virtual void set_current_process(process_intel_x64 *proc)
+    { m_process = proc; }
+
+protected:
+
+    void handle_exit(intel_x64::vmcs::value_type reason) override;
+    void handle_vmcall_registers(vmcall_registers_t &regs) override;
+
+    void create_process_list(vmcall_registers_t &regs);
+    void delete_process_list(vmcall_registers_t &regs);
+
+    void create_vcpu(vmcall_registers_t &regs);
+    void delete_vcpu(vmcall_registers_t &regs);
+
+    void create_process(vmcall_registers_t &regs);
+    void delete_process(vmcall_registers_t &regs);
+
+    void vm_map(vmcall_registers_t &regs);
+    void vm_map_lookup(vmcall_registers_t &regs);
+
+    void set_thread_info(vmcall_registers_t &regs);
+
+    void sched_yield(vmcall_registers_t &regs);
+
+    void set_program_break(vmcall_registers_t &regs);
+    void increase_program_break(vmcall_registers_t &regs);
+    void decrease_program_break(vmcall_registers_t &regs);
+
+private:
+
+    coreid::type m_coreid;
+    vcpuid::type m_vcpuid;
+    gsl::not_null<process_list *> m_proclt;
+    gsl::not_null<domain_intel_x64 *> m_domain;
+
+    process_intel_x64 *m_process;
 
 public:
 

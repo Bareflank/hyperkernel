@@ -1,5 +1,5 @@
 #
-# Bareflank Hypervisor
+# Bareflank Hyperkernel
 #
 # Copyright (C) 2015 Assured Information Security, Inc.
 # Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -49,7 +49,7 @@ CROSS_OUTDIR+=%BUILD_REL%/../bin
 # Sources
 ################################################################################
 
-SOURCES+=vcpu_factory.cpp
+SOURCES+=vcpu_factory_intel_x64.cpp
 
 INCLUDE_PATHS+=../../../include
 INCLUDE_PATHS+=%HYPER_ABS%/include/

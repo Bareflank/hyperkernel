@@ -1,5 +1,5 @@
 #
-# Bareflank Hypervisor
+# Bareflank Hyperkernel
 #
 # Copyright (C) 2015 Assured Information Security, Inc.
 # Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -31,7 +31,14 @@ LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/bfvmm/src/vmcs/bin/native
 LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/bfvmm/src/vmxon/bin/native
 LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/extended_apis/src/exit_handler/bin/native
 LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/extended_apis/src/vmcs/bin/native
+LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/hyperkernel/src/domain/bin/native
+LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/hyperkernel/src/domain_factory/bin/native
 LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/hyperkernel/src/exit_handler/bin/native
+LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/hyperkernel/src/scheduler/bin/native
+LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/hyperkernel/src/scheduler_factory/bin/native
+LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/hyperkernel/src/task/bin/native
+LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/hyperkernel/src/task_factory/bin/native
+LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/hyperkernel/src/vcpu/bin/native
 LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/hyperkernel/src/vcpu_factory/bin/native
 LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/hyperkernel/src/vmcall_policy/bin/native
 LIBRARY_PATH := $(LIBRARY_PATH):%BUILD_ABS%/makefiles/hyperkernel/src/vmcs/bin/native
