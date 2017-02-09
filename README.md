@@ -16,16 +16,11 @@ of a full blown hypervisor in favor of an implementation that is simple to
 read and follow.
 
 It is our goal to provide a hypervisor that others can extend to create
-their own hypervisors. To this end, it is likely that when creating your
-own hypervisor, some tasks will be redundant. For example, starting and
-stopping guest virtual machines, setting up guest -> guest communications,
-and managing vmcall permissions will likely all be needed if your particular
-use case requires guest virtual machine support.
-
-The purpose of this repository, is to provide a set of APIs that enables the
-creation and management of guest virtual machines. Because this set of APIs
-is designed to be generic, we intended to support (over time) the following
-different guest virtual machine types:
+their own hypervisors. To this end, the purpose of this repository, is to
+provide a set of APIs that enables the creation and management of guest
+virtual machines. Because this set of APIs is designed to be generic, we
+intended to support (over time) the following different guest virtual machine
+types:
 
 - VM applications (think [LibVMI](http://libvmi.com/) in a VM with no OS)
 - Unikernels (e.g. [IncludeOS](http://www.includeos.org))
@@ -48,24 +43,23 @@ git clone https://github.com/Bareflank/hyperkernel.git
 sudo reboot
 
 cd ~/hypervisor
-./configure -m ./hyperkernel/bin/hyperkernel.modules
+./configure -m hyperkernel/bin/hyperkernel.modules
+
+make driver_load
 
 make
-make test
-```
-
-To test out the extended version of Bareflank, all we need to do is run the
-make shortcuts as usual:
-
-```
-make driver_load
 make quick
+```
 
-make status
-make dump
+Currently, to test out the hyperkernel, you can run the following test
+VM applications. The applications are basic C and C++ applications that
+print "hello world" using wither C or C++, and execute in a virtual machine
+with no OS.
 
-make stop
-make driver_unload
+```
+./makefiles/hyperkernel/bfexec/bin/native/bfexec /home/user/hypervisor/makefiles/hyperkernel/tests/basic_c/bin/cross/basic_c
+./makefiles/hyperkernel/bfexec/bin/native/bfexec /home/user/hypervisor/makefiles/hyperkernel/tests/basic_cxx/bin/cross/basic_cxx
+
 ```
 
 ## Links
