@@ -59,7 +59,6 @@ with no OS.
 ```
 ./makefiles/hyperkernel/bfexec/bin/native/bfexec /home/user/hypervisor/makefiles/hyperkernel/tests/basic_c/bin/cross/basic_c
 ./makefiles/hyperkernel/bfexec/bin/native/bfexec /home/user/hypervisor/makefiles/hyperkernel/tests/basic_cxx/bin/cross/basic_cxx
-
 ```
 
 ## Links
