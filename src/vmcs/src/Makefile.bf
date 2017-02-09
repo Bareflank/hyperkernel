@@ -1,5 +1,5 @@
 #
-# Bareflank Hypervisor
+# Bareflank Hyperkernel
 #
 # Copyright (C) 2015 Assured Information Security, Inc.
 # Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -65,6 +65,7 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 ################################################################################
 
 SOURCES+=vmcs_intel_x64_hyperkernel.cpp
+SOURCES+=vmcs_intel_x64_guest_vm_state.cpp
 
 INCLUDE_PATHS+=../../../include
 INCLUDE_PATHS+=%HYPER_ABS%/include/

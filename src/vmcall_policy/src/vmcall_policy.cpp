@@ -1,5 +1,5 @@
 //
-// Bareflank Hypervisor Examples
+// Bareflank Hyperkernel
 //
 // Copyright (C) 2015 Assured Information Security, Inc.
 // Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -24,4 +24,12 @@
 void
 exit_handler_intel_x64_eapis::init_policy()
 {
+    // FUTURE
+    //
+    // We need to implement VMcall policies. Note that this will need a lot
+    // of information about domain, process list, process and thread info,
+    // as well as the specific ares to the hypercall. As a result, we will
+    // likely need to create policy structs that can be created easily for
+    // each hypercall.
+    //
 }

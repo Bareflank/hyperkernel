@@ -1,5 +1,5 @@
 #
-# Bareflank Hypervisor Examples
+# Bareflank Hyperkernel
 #
 # Copyright (C) 2015 Assured Information Security, Inc.
 # Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -23,7 +23,14 @@
 # Subdirs
 ################################################################################
 
+PARENT_SUBDIRS += bfc
+PARENT_SUBDIRS += bfpthread
+PARENT_SUBDIRS += bfsyscall
+PARENT_SUBDIRS += bfcrt
+PARENT_SUBDIRS += bfcxx
+PARENT_SUBDIRS += bfexec
 PARENT_SUBDIRS += src
+PARENT_SUBDIRS += tests
 
 ################################################################################
 # Common
