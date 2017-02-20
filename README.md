@@ -53,7 +53,7 @@ make quick
 
 Currently, to test out the hyperkernel, you can run the following test
 VM applications. The applications are basic C and C++ applications that
-print "hello world" using wither C or C++, and execute in a virtual machine
+print "hello world" using either C or C++, and execute in a virtual machine
 with no OS.
 
 ```
