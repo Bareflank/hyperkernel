@@ -54,7 +54,6 @@ SOURCES+=vcpu.cpp
 SOURCES+=process.cpp
 SOURCES+=process_list.cpp
 SOURCES+=%HYPER_ABS%/common/vmcall_intel_x64.asm
-SOURCES+=%HYPER_ABS%/bfelf_loader/src/bfelf_loader.c
 
 INCLUDE_PATHS+=./
 INCLUDE_PATHS+=../include/
