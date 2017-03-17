@@ -46,7 +46,7 @@ $(BUILD_ABS)/sysroot_vmapp:
 	$(HYPER_REL)/../tools/scripts/configure_hyperkernel.sh $(BUILD_ABS)
 
 $(BUILD_ABS)/sysroot_vmapp/x86_64-vmapp-elf/lib/libc.so: $(BUILD_ABS)/sysroot_vmapp
-	$(BUILD_ABS)/build_scripts/x86_64-vmapp-docker $(BUILD_ABS)/build_scripts/build_newlib.sh
+	SYSROOT_NAME=vmapp $(BUILD_ABS)/build_scripts/build_newlib.sh
 
 build_src: all
 build_tests: all
@@ -59,8 +59,10 @@ run_tests:
 clean: clean_src
 
 clean_src:
-	rm $(BUILD_ABS)/sysroot_vmapp/x86_64-vmapp-elf/lib/libc.so
-	rm $(BUILD_ABS)/sysroot_vmapp/x86_64-vmapp-elf/lib/libbfc.so
+	rm -Rf $(BUILD_ABS)/sysroot_vmapp/x86_64-vmapp-elf/lib/libg.a
+	rm -Rf $(BUILD_ABS)/sysroot_vmapp/x86_64-vmapp-elf/lib/libm.a
+	rm -Rf $(BUILD_ABS)/sysroot_vmapp/x86_64-vmapp-elf/lib/libc.a
+	rm -Rf $(BUILD_ABS)/sysroot_vmapp/x86_64-vmapp-elf/lib/libc.so
 
 clean_tests:
 	@echo > /dev/null

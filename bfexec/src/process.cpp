@@ -117,7 +117,7 @@ process::process(const std::string &filename, processlistid::type procltid) :
     auto &&elf = load_elf(m_filename);
     for (auto i = 0; i < bfelf_file_get_num_needed(elf); i++)
     {
-        char *needed;
+        const char *needed;
         ret = bfelf_file_get_needed(elf, static_cast<uint64_t>(i), &needed);
         if (ret != BFELF_SUCCESS)
             throw std::runtime_error("bfelf_file_get_needed failed");
@@ -221,7 +221,7 @@ process::load_elf(const std::string &filename)
     auto &&pic = bfelf_file_get_pic_pie(elf_ptr);
     auto &&mem = malloc_aligned<char>(static_cast<std::size_t>(tsz));
 
-    for (auto i = 0; i < bfelf_file_num_load_instrs(elf_ptr); i++)
+    for (auto i = 0; i < bfelf_file_get_num_load_instrs(elf_ptr); i++)
     {
         struct bfelf_load_instr *instr = nullptr;
 
