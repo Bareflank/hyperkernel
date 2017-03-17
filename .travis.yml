@@ -103,7 +103,7 @@ matrix:
       - cd hypervisor
       - git clone https://github.com/bareflank/extended_apis.git
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.8
       - git clone https://github.com/rizsotto/bear.git
       - pushd bear; cmake .; make; sudo make install; popd
       - sudo ln -s /usr/bin/clang-tidy-3.8 /usr/bin/clang-tidy
@@ -126,7 +126,7 @@ matrix:
       - cd hypervisor
       - git clone https://github.com/bareflank/extended_apis.git
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.8
     script:
       - DYNAMIC_ANALYSIS_ENABLED=true make
       - make test
@@ -146,7 +146,7 @@ matrix:
       - cd hypervisor
       - git clone https://github.com/bareflank/extended_apis.git
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang_38
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.8
       - cat env.sh
     script:
       - make
@@ -167,7 +167,7 @@ matrix:
       - cd hypervisor
       - git clone https://github.com/bareflank/extended_apis.git
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang_39
+      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.9
       - cat env.sh
     script:
       - make
