@@ -1,5 +1,7 @@
-<img src="https://raw.githubusercontent.com/Bareflank/hyperkernel/master/doc/images/bareflank_hyperkernel_logo.jpg" width="501">
-
+![Hyperkernel](https://raw.githubusercontent.com/Bareflank/hyperkernel/master/doc/images/bareflank_hyperkernel_logo.jpg)
+<br>
+<br>
+<br>
 [![GitHub version](https://badge.fury.io/gh/Bareflank%2Fextended_apis.svg)](https://badge.fury.io/gh/Bareflank%2Fextended_apis)
 [![Build Status](https://travis-ci.org/Bareflank/hyperkernel.svg?branch=master)](https://travis-ci.org/Bareflank/hyperkernel)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/325/badge)](https://bestpractices.coreinfrastructure.org/projects/325)
