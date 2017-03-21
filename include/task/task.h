@@ -28,6 +28,8 @@
 #include <vcpuid.h>
 
 class domain;
+class thread;
+class process;
 class process_list;
 
 class task
@@ -68,6 +70,24 @@ public:
     /// @ensures none
     ///
     virtual void schedule() = 0;
+
+    /// Schedule (args)
+    ///
+    /// Executes this task. Note that the task is really a vCPU, which could
+    /// be executing a bunch of VM apps, or a single Thick VM. For this reason,
+    /// this is a pure virtual function as the vCPU needs to implement this
+    /// function based on how the hardware executes a VM.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    virtual void schedule(thread *thrd, uintptr_t entry, uintptr_t arg1, uintptr_t arg2) = 0;
+
+    /// Done
+    ///
+    /// @return returns true if there is no more work to be done,
+    ///     false otherwise
+    virtual size_t num_jobs();
 
 private:
 

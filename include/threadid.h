@@ -22,7 +22,7 @@
 #ifndef THREADID_H
 #define THREADID_H
 
-#include <stdint.h>
+#include <cstdint>
 
 // *INDENT-OFF*
 

@@ -22,7 +22,7 @@
 #ifndef SCHEDULERID_H
 #define SCHEDULERID_H
 
-#include <stdint.h>
+#include <cstdint>
 
 // *INDENT-OFF*
 

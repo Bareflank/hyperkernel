@@ -34,6 +34,12 @@ domain_intel_x64::domain_intel_x64(domainid::type id) :
     m_vmapp_gdt{512},
     m_vmapp_idt{512},
     m_vmapp_tss{std::make_unique<uint64_t[]>(512)},
+    m_tss_base_phys{0},
+    m_gdt_base_phys{0},
+    m_idt_base_phys{0},
+    m_tss_base_virt{0},
+    m_gdt_base_virt{0},
+    m_idt_base_virt{0},
     m_root_pt{std::make_unique<root_page_table_x64>()}
 { }
 

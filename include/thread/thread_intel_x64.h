@@ -19,51 +19,61 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef SCHEDULER_FACTORY_H
-#define SCHEDULER_FACTORY_H
+#ifndef THREAD_INTEL_X64_H
+#define THREAD_INTEL_X64_H
 
-#include <memory>
+#include <thread/thread.h>
+#include <exit_handler/state_save_intel_x64.h>
 
-#include <user_data.h>
-#include <schedulerid.h>
-#include <scheduler/scheduler.h>
-
-class scheduler_factory
+class thread_intel_x64 : public thread
 {
 public:
 
-    /// Default Constructor
+    /// Constructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    scheduler_factory() noexcept = default;
+    /// @param id the id of the thread
+    /// @param proc the process that owns this thread
+    ///
+    thread_intel_x64(threadid::type id, gsl::not_null<process *> proc);
 
     /// Destructor
     ///
     /// @expects none
     /// @ensures none
     ///
-    virtual ~scheduler_factory() = default;
+    ~thread_intel_x64() override = default;
 
-    /// Make Scheduler
+    /// Set Thread Info
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param schedulerid the schedulerid for the scheduler to create
-    /// @param data user data passed to the scheduler
-    /// @return returns a pointer to a newly created scheduler.
+    /// @param entry the entry point of the thread
+    /// @param stack the thread's stack
+    /// @param arg1 the first arg passed to the thread
+    /// @param arg2 the second arg passed to the thread
     ///
-    virtual std::unique_ptr<scheduler> make_scheduler(schedulerid::type schedulerid, user_data *data = nullptr);
+    void set_info(uintptr_t entry, uintptr_t stack, uintptr_t arg1, uintptr_t arg2) override;
+
+    /// TODO:
+    ///
+    /// These should not be public
+    ///
+    uintptr_t m_stack;
+    state_save_intel_x64 m_state_save;
 
 public:
 
-    scheduler_factory(scheduler_factory &&) = default;
-    scheduler_factory &operator=(scheduler_factory &&) = default;
+    friend class hyperkernel_ut;
 
-    scheduler_factory(const scheduler_factory &) = delete;
-    scheduler_factory &operator=(const scheduler_factory &) = delete;
+    thread_intel_x64(thread_intel_x64 &&) = default;
+    thread_intel_x64 &operator=(thread_intel_x64 &&) = default;
+
+    thread_intel_x64(const thread_intel_x64 &) = delete;
+    thread_intel_x64 &operator=(const thread_intel_x64 &) = delete;
 };
 
 #endif

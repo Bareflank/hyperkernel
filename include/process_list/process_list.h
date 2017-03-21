@@ -26,6 +26,7 @@
 
 #include <map>
 #include <set>
+#include <list>
 #include <mutex>
 #include <memory>
 
@@ -171,6 +172,19 @@ public:
     ///
     virtual gsl::not_null<process *> get_process(processid::type processid);
 
+    /// Remove Process
+    ///
+    /// Remove the process from the process list. This does not delete the
+    /// process, and thus the process can still be executed. If you wish to
+    /// delete the process, use delete_process.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param processid the process to remove from the process list
+    ///
+    virtual void remove_process(processid::type processid);
+
     /// Get Next Job
     ///
     /// This function is called by a vCPU to get the next thing to execute.
@@ -184,6 +198,13 @@ public:
     ///     by a vCPU
     ///
     virtual std::pair<thread *, process *> next_job();
+
+    /// Job Count
+    ///
+    /// @return returns the total number of processes in this process list.
+    ///
+    auto num_jobs()
+    { return m_process_list.size(); }
 
 private:
 
@@ -208,6 +229,8 @@ private:
     processid::type m_process_next_id;
     std::map<processid::type, std::unique_ptr<process>> m_processes;
 
+    std::list<processid::type> m_process_list;
+
 private:
 
     std::unique_ptr<process_factory> m_process_factory;
@@ -219,8 +242,8 @@ public:
 
     friend class hyperkernel_ut;
 
-    process_list(process_list &&) = default;
-    process_list &operator=(process_list &&) = default;
+    process_list(process_list &&) = delete;
+    process_list &operator=(process_list &&) = delete;
 
     process_list(const process_list &) = delete;
     process_list &operator=(const process_list &) = delete;

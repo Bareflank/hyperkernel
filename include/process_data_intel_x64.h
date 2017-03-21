@@ -38,6 +38,14 @@ public:
     ~process_data_intel_x64() override = default;
 
     domain_intel_x64 *m_domain;
+
+public:
+
+    process_data_intel_x64(process_data_intel_x64 &&) = default;
+    process_data_intel_x64 &operator=(process_data_intel_x64 &&) = default;
+
+    process_data_intel_x64(const process_data_intel_x64 &) = delete;
+    process_data_intel_x64 &operator=(const process_data_intel_x64 &) = delete;
 };
 
 #endif

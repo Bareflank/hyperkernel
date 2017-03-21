@@ -20,7 +20,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <stdio.h>
+#include <gsl/gsl>
+#include <iostream>
+#include <vmcall_hyperkernel_interface.h>
+
+void
+handle_ttys0(char val)
+{
+    vmcall__ttys1(val);
+    vmcall__sched_yield();
+}
 
 int
 main(int argc, const char *argv[])
@@ -28,6 +37,12 @@ main(int argc, const char *argv[])
     (void) argc;
     (void) argv;
 
-    printf("hello world\n");
+    vmcall__register_ttys0(reinterpret_cast<uintptr_t>(handle_ttys0));
+
+    auto msg = gsl::ensure_z("registered: ttys0\n");
+    for (auto c : msg)
+        vmcall__ttys1(c);
+
+    vmcall__sched_yield_and_remove();
     return 0;
 }

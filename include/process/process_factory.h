@@ -60,6 +60,14 @@ public:
     /// @return returns a pointer to a newly created process.
     ///
     virtual std::unique_ptr<process> make_process(processid::type processid, user_data *data = nullptr);
+
+public:
+
+    process_factory(process_factory &&) = default;
+    process_factory &operator=(process_factory &&) = default;
+
+    process_factory(const process_factory &) = delete;
+    process_factory &operator=(const process_factory &) = delete;
 };
 
 #endif

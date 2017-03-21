@@ -39,9 +39,21 @@ extern "C" {
 #define bool int
 #endif
 
+#ifndef __cplusplus
+#define struct_init {0}
+#else
+#define struct_init {}
+#endif
+
+#ifndef __cplusplus
+#define scast(a, b) ((a)(b))
+#else
+#define scast(a, b) (static_cast<a>(b))
+#endif
+
 void vmcall(struct vmcall_registers_t *regs);
 
-typedef enum
+enum hyperkernel_vmcall_functions
 {
     hyperkernel_vmcall__create_process_list = 0x101,
     hyperkernel_vmcall__delete_process_list = 0x102,
@@ -60,17 +72,27 @@ typedef enum
     hyperkernel_vmcall__set_thread_info = 0x501,
 
     hyperkernel_vmcall__sched_yield = 0x1001,
+    hyperkernel_vmcall__sched_yield_and_remove = 0x1002,
 
     hyperkernel_vmcall__set_program_break = 0x1101,
     hyperkernel_vmcall__increase_program_break = 0x1102,
     hyperkernel_vmcall__decrease_program_break = 0x1103,
 
-} hyperkernel_vmcall_functions;
+    // TODO:
+    //
+    // These need to be made more generic
+    //
+
+    hyperkernel_vmcall__ttys0 = 0x2001,
+    hyperkernel_vmcall__ttys1 = 0x2002,
+    hyperkernel_vmcall__register_ttys0 = 0x3001,
+
+};
 
 inline uint64_t
 vmcall__create_process_list(void)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -88,7 +110,7 @@ vmcall__create_process_list(void)
 inline uint64_t
 vmcall__create_foreign_process_list(uint64_t domainid)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -106,7 +128,7 @@ vmcall__create_foreign_process_list(uint64_t domainid)
 inline bool
 vmcall__delete_process_list(uint64_t procltid)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -121,7 +143,7 @@ vmcall__delete_process_list(uint64_t procltid)
 inline uint64_t
 vmcall__create_vcpu()
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -139,7 +161,7 @@ vmcall__create_vcpu()
 inline uint64_t
 vmcall__create_foreign_vcpu(uint64_t procltid)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -157,7 +179,7 @@ vmcall__create_foreign_vcpu(uint64_t procltid)
 inline bool
 vmcall__delete_vcpu(uint64_t vcpuid)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -172,7 +194,7 @@ vmcall__delete_vcpu(uint64_t vcpuid)
 inline uint64_t
 vmcall__create_process()
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -190,7 +212,7 @@ vmcall__create_process()
 inline uint64_t
 vmcall__create_foreign_process(uint64_t procltid)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -208,7 +230,7 @@ vmcall__create_foreign_process(uint64_t procltid)
 inline bool
 vmcall__delete_foreign_process(uint64_t procltid, uint64_t processid)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -230,7 +252,7 @@ vmcall__vm_map_foreign(
     uint64_t size,
     uint64_t perm)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -256,7 +278,7 @@ vmcall__vm_map_foreign_lookup(
     uint64_t size,
     uint64_t perm)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -281,7 +303,7 @@ vmcall__set_thread_info(
     uint64_t arg1,
     uint64_t arg2)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -309,7 +331,7 @@ vmcall__set_thread_foreign_info(
     uint64_t arg1,
     uint64_t arg2)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -330,7 +352,7 @@ vmcall__set_thread_foreign_info(
 inline bool
 vmcall__sched_yield()
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -341,12 +363,24 @@ vmcall__sched_yield()
     return regs.r01 == REG_SUCCESS;
 }
 
-// TODO: Foreign call
+inline bool
+vmcall__sched_yield_and_remove()
+{
+    struct vmcall_registers_t regs = struct_init;
+
+    regs.r00 = VMCALL_REGISTERS;
+    regs.r01 = VMCALL_MAGIC_NUMBER;
+    regs.r02 = hyperkernel_vmcall__sched_yield_and_remove;      // vmcall index
+
+    vmcall(&regs);
+
+    return regs.r01 == REG_SUCCESS;
+}
 
 inline bool
 vmcall__set_program_break(uint64_t program_break)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -363,7 +397,7 @@ vmcall__set_program_break(uint64_t program_break)
 inline bool
 vmcall__increase_program_break()
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -379,7 +413,7 @@ vmcall__increase_program_break()
 inline bool
 vmcall__increase_foreign_program_break(uint64_t procltid, uint64_t processid)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -395,7 +429,7 @@ vmcall__increase_foreign_program_break(uint64_t procltid, uint64_t processid)
 inline bool
 vmcall__decrease_program_break()
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
@@ -411,13 +445,58 @@ vmcall__decrease_program_break()
 inline bool
 vmcall__decrease_foreign_program_break(uint64_t procltid, uint64_t processid)
 {
-    struct vmcall_registers_t regs;
+    struct vmcall_registers_t regs = struct_init;
 
     regs.r00 = VMCALL_REGISTERS;
     regs.r01 = VMCALL_MAGIC_NUMBER;
     regs.r02 = hyperkernel_vmcall__decrease_program_break;      // vmcall index
     regs.r03 = procltid;                                        // process list id
     regs.r04 = processid;                                       // process id
+
+    vmcall(&regs);
+
+    return regs.r01 == REG_SUCCESS;
+}
+
+inline bool
+vmcall__ttys0(char val)
+{
+    struct vmcall_registers_t regs = struct_init;
+
+    regs.r00 = VMCALL_REGISTERS;
+    regs.r01 = VMCALL_MAGIC_NUMBER;
+    regs.r02 = hyperkernel_vmcall__ttys0;
+    regs.r03 = scast(uintptr_t, val);
+
+    vmcall(&regs);
+
+    return regs.r01 == REG_SUCCESS;
+}
+
+inline bool
+vmcall__ttys1(char val)
+{
+    struct vmcall_registers_t regs = struct_init;
+
+    regs.r00 = VMCALL_REGISTERS;
+    regs.r01 = VMCALL_MAGIC_NUMBER;
+    regs.r02 = hyperkernel_vmcall__ttys1;
+    regs.r03 = scast(uintptr_t, val);
+
+    vmcall(&regs);
+
+    return regs.r01 == REG_SUCCESS;
+}
+
+inline bool
+vmcall__register_ttys0(uintptr_t func)
+{
+    struct vmcall_registers_t regs = struct_init;
+
+    regs.r00 = VMCALL_REGISTERS;
+    regs.r01 = VMCALL_MAGIC_NUMBER;
+    regs.r02 = hyperkernel_vmcall__register_ttys0;
+    regs.r03 = func;
 
     vmcall(&regs);
 

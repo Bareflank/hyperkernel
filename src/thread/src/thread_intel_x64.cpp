@@ -1,5 +1,5 @@
 //
-// Bareflank Hypervisor
+// Bareflank Hyperkernel
 //
 // Copyright (C) 2015 Assured Information Security, Inc.
 // Author: Rian Quinn        <quinnr@ainfosec.com>
@@ -19,33 +19,26 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef PROCESS_LIST_DATA_H
-#define PROCESS_LIST_DATA_H
+#include <debug.h>
+#include <thread/thread_intel_x64.h>
 
-#include <gsl/gsl>
-#include <user_data.h>
+thread_intel_x64::thread_intel_x64(threadid::type id, gsl::not_null<process *> proc) :
+    thread(id, proc),
+    m_stack{},
+    m_state_save{}
+{ }
 
-class domain;
-
-class process_list_data : public user_data
+void
+thread_intel_x64::set_info(
+    uintptr_t entry,
+    uintptr_t stack,
+    uintptr_t arg1,
+    uintptr_t arg2)
 {
-public:
+    m_state_save.rip = entry;
+    m_state_save.rsp = stack;
+    m_state_save.rdi = arg1;
+    m_state_save.rsi = arg2;
 
-    process_list_data() noexcept :
-        m_domain(nullptr)
-    { }
-
-    ~process_list_data() override = default;
-
-    domain *m_domain;
-
-public:
-
-    process_list_data(process_list_data &&) = default;
-    process_list_data &operator=(process_list_data &&) = default;
-
-    process_list_data(const process_list_data &) = delete;
-    process_list_data &operator=(const process_list_data &) = delete;
-};
-
-#endif
+    m_stack = stack;
+}

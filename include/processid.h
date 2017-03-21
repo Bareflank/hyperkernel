@@ -22,7 +22,7 @@
 #ifndef PROCESSID_H
 #define PROCESSID_H
 
-#include <stdint.h>
+#include <cstdint>
 
 // *INDENT-OFF*
 

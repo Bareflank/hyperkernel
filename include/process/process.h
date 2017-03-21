@@ -194,8 +194,8 @@ public:
 
     friend class hyperkernel_ut;
 
-    process(process &&) = default;
-    process &operator=(process &&) = default;
+    process(process &&) = delete;
+    process &operator=(process &&) = delete;
 
     process(const process &) = delete;
     process &operator=(const process &) = delete;

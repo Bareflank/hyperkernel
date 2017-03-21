@@ -57,7 +57,6 @@
 #include <constants.h>
 #include <eh_frame_list.h>
 
-#include <serial_x64.h>
 #include <vmcall_hyperkernel_interface.h>
 
 #define UNHANDLED() \
@@ -68,10 +67,9 @@
         write(0, str_text, strlen(str_text)); \
         write(0, str_func, strlen(str_func)); \
         write(0, str_endl, strlen(str_endl)); \
-        hlt_cpu(); \
+        vmcall__sched_yield_and_remove(); \
     }
 
-extern "C" void hlt_cpu(void);
 extern "C" void vmcall(struct vmcall_registers_t *regs);
 extern "C" void vmcall_event(struct vmcall_registers_t *regs);
 
@@ -277,7 +275,7 @@ _exit(int status)
 {
     (void) status;
 
-    hlt_cpu();
+    vmcall__sched_yield_and_remove();
     while (1);
 }
 
@@ -443,7 +441,9 @@ write(int file, const void *buffer, size_t count)
 
     try
     {
-        serial_x64::instance()->write(static_cast<const char *>(buffer), count);
+        for (auto i = 0UL; i < count; i++)
+            vmcall__ttys0(static_cast<const char *>(buffer)[i]);
+
         return static_cast<int>(count);
     }
     catch (...) { }

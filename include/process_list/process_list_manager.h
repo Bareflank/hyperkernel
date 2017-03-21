@@ -105,8 +105,8 @@ public:
 
     friend class hyperkernel_ut;
 
-    process_list_manager(process_list_manager &&) = default;
-    process_list_manager &operator=(process_list_manager &&) = default;
+    process_list_manager(process_list_manager &&) = delete;
+    process_list_manager &operator=(process_list_manager &&) = delete;
 
     process_list_manager(const process_list_manager &) = delete;
     process_list_manager &operator=(const process_list_manager &) = delete;

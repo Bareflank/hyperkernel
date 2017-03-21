@@ -39,6 +39,9 @@
 #include <process/process.h>
 #include <process/process_intel_x64.h>
 
+#include <thread/thread.h>
+#include <thread/thread_intel_x64.h>
+
 #include <process_list/process_list.h>
 #include <process_list/process_list_manager.h>
 
@@ -64,7 +67,7 @@ exit_handler_intel_x64_hyperkernel::exit_handler_intel_x64_hyperkernel(
     m_vcpuid(vcpuid),
     m_proclt(proclt),
     m_domain(domain),
-    m_process(nullptr)
+    m_thread(nullptr)
 { }
 
 void
@@ -72,12 +75,6 @@ exit_handler_intel_x64_hyperkernel::handle_exit(vmcs::value_type reason)
 {
     switch (reason)
     {
-        case exit_reason::basic_exit_reason::hlt:
-        {
-            g_shm->get_scheduler(m_coreid)->yield();
-            break;
-        }
-
         case exit_reason::basic_exit_reason::vm_entry_failure_invalid_guest_state:
         case exit_reason::basic_exit_reason::ept_violation:
         case exit_reason::basic_exit_reason::triple_fault:
@@ -196,6 +193,15 @@ exit_handler_intel_x64_hyperkernel::delete_process(vmcall_registers_t &regs)
     // could end up dangling. Who owns it?
     //
 
+    // FUTURE:
+    //
+    // Need a generic way to register a driver so that this code has a
+    // generic way to cleanup
+    //
+
+    if (m_ttys0.m_thread != nullptr && m_ttys0.m_thread->proc()->id() == regs.r04)
+        m_ttys0 = {};
+
     proclt->delete_process(regs.r04);
 }
 
@@ -220,12 +226,7 @@ exit_handler_intel_x64_hyperkernel::vm_map(vmcall_registers_t &regs)
         proclt = g_plm->get_process_list(regs.r03).get();
 
     auto &&proc = proclt->get_process(regs.r04);
-
-    proc->vm_map(
-        regs.r05,
-        regs.r06,
-        regs.r07,
-        regs.r08);
+    proc->vm_map(regs.r05, regs.r06, regs.r07, regs.r08);
 }
 
 void
@@ -251,12 +252,7 @@ exit_handler_intel_x64_hyperkernel::vm_map_lookup(vmcall_registers_t &regs)
     auto &&cr3 = vmcs::guest_cr3::get();
     auto &&proc = proclt->get_process(regs.r04);
 
-    proc->vm_map_lookup(
-        regs.r05,
-        cr3,
-        regs.r06,
-        regs.r07,
-        regs.r08);
+    proc->vm_map_lookup(regs.r05, cr3, regs.r06, regs.r07, regs.r08);
 }
 
 void
@@ -280,36 +276,50 @@ exit_handler_intel_x64_hyperkernel::set_thread_info(vmcall_registers_t &regs)
         proclt = g_plm->get_process_list(regs.r03).get();
 
     auto &&proc = proclt->get_process(regs.r04);
-    auto &&thread = proc->get_thread(regs.r05);
+    auto &&thrd = proc->get_thread(regs.r05);
 
-    thread->set_info(regs.r06, regs.r07, regs.r08, regs.r09);
+    thrd->set_info(regs.r06, regs.r07, regs.r08, regs.r09);
 }
 
 void
 exit_handler_intel_x64_hyperkernel::sched_yield(vmcall_registers_t &regs)
 {
     this->complete_vmcall(BF_VMCALL_SUCCESS, regs);
+
+    if (m_thread != nullptr)
+        m_thread->m_state_save = *m_state_save;
+
     g_shm->get_scheduler(m_coreid)->yield();
+}
+
+void
+exit_handler_intel_x64_hyperkernel::sched_yield_and_remove(vmcall_registers_t &regs)
+{
+    expects(m_thread != nullptr);
+
+    m_proclt->remove_process(m_thread->proc()->id());
+    sched_yield(regs);
 }
 
 void
 exit_handler_intel_x64_hyperkernel::set_program_break(vmcall_registers_t &regs)
 {
+    expects(m_thread != nullptr);
+
     // TODO
     //
     // Need to implement the foreign calls. This will have to get the proclist
     // and the process to do this
     //
 
-    if (m_process == nullptr)
-        throw std::runtime_error("no process is running");
-
-    m_process->clear_set_program_break(regs.r05);
+    m_thread->proc()->clear_set_program_break(regs.r05);
 }
 
 void
 exit_handler_intel_x64_hyperkernel::increase_program_break(vmcall_registers_t &regs)
 {
+    expects(m_thread != nullptr);
+
     (void) regs;
 
     // TODO
@@ -318,15 +328,14 @@ exit_handler_intel_x64_hyperkernel::increase_program_break(vmcall_registers_t &r
     // and the process to do this
     //
 
-    if (m_process == nullptr)
-        throw std::runtime_error("no process is running");
-
-    m_process->increase_program_break_4k();
+    m_thread->proc()->increase_program_break_4k();
 }
 
 void
 exit_handler_intel_x64_hyperkernel::decrease_program_break(vmcall_registers_t &regs)
 {
+    expects(m_thread != nullptr);
+
     (void) regs;
 
     // TODO
@@ -335,10 +344,33 @@ exit_handler_intel_x64_hyperkernel::decrease_program_break(vmcall_registers_t &r
     // and the process to do this
     //
 
-    if (m_process == nullptr)
-        throw std::runtime_error("no process is running");
+    m_thread->proc()->decrease_program_break_4k();
+}
 
-    m_process->decrease_program_break_4k();
+void
+exit_handler_intel_x64_hyperkernel::handle_ttys0(vmcall_registers_t &regs)
+{
+    if (m_ttys0.m_thread == nullptr)
+        return handle_ttys1(regs);
+
+    this->complete_vmcall(BF_VMCALL_SUCCESS, regs);
+    m_thread->m_state_save = *m_state_save;
+    g_shm->get_scheduler(m_coreid)->schedule(m_ttys0.m_thread, m_ttys0.m_entry, regs.r03, 0);
+}
+
+void
+exit_handler_intel_x64_hyperkernel::handle_ttys1(vmcall_registers_t &regs)
+{
+    std::cout << gsl::narrow_cast<char>(regs.r03);
+}
+
+void
+exit_handler_intel_x64_hyperkernel::register_ttys0(vmcall_registers_t &regs)
+{
+    m_ttys0.m_entry = regs.r03;
+    m_ttys0.m_domain = m_domain;
+    m_ttys0.m_thread = m_thread;
+    m_ttys0.m_proclt = m_proclt.get();
 }
 
 void
@@ -382,6 +414,10 @@ exit_handler_intel_x64_hyperkernel::handle_vmcall_registers(vmcall_registers_t &
             sched_yield(regs);
             break;
 
+        case hyperkernel_vmcall__sched_yield_and_remove:
+            sched_yield_and_remove(regs);
+            break;
+
         case hyperkernel_vmcall__set_program_break:
             set_program_break(regs);
             break;
@@ -392,6 +428,18 @@ exit_handler_intel_x64_hyperkernel::handle_vmcall_registers(vmcall_registers_t &
 
         case hyperkernel_vmcall__decrease_program_break:
             decrease_program_break(regs);
+            break;
+
+        case hyperkernel_vmcall__ttys0:
+            handle_ttys0(regs);
+            break;
+
+        case hyperkernel_vmcall__ttys1:
+            handle_ttys1(regs);
+            break;
+
+        case hyperkernel_vmcall__register_ttys0:
+            register_ttys0(regs);
             break;
 
         default:

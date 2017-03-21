@@ -31,7 +31,12 @@
 #include <scheduler/scheduler.h>
 #include <scheduler/scheduler_manager.h>
 
+#include <process/process.h>
 #include <process/process_intel_x64.h>
+
+#include <thread/thread.h>
+#include <thread/thread_intel_x64.h>
+
 #include <process_list/process_list.h>
 
 vcpu_intel_x64_hyperkernel::vcpu_intel_x64_hyperkernel(
@@ -88,33 +93,60 @@ void
 vcpu_intel_x64_hyperkernel::schedule()
 {
     auto &&pair = m_proclt->next_job();
-    auto &&thrd = std::get<0>(pair);
+
+    auto &&thrd = dynamic_cast<thread_intel_x64 *>(std::get<0>(pair));
     auto &&proc = dynamic_cast<process_intel_x64 *>(std::get<1>(pair));
 
+    schedule(proc, thrd, &thrd->m_state_save);
+}
+
+void
+vcpu_intel_x64_hyperkernel::schedule(thread *thrd, uintptr_t entry, uintptr_t arg1, uintptr_t arg2)
+{
+    state_save_intel_x64 state_save = {};
+
+    auto &&_thrd = dynamic_cast<thread_intel_x64 *>(thrd);
+    auto &&_proc = dynamic_cast<process_intel_x64 *>(thrd->proc().get());
+
+    state_save.rip = entry;
+    state_save.rsp = _thrd->m_stack;
+    state_save.rdi = arg1;
+    state_save.rsi = arg2;
+
+    schedule(_proc, _thrd, &state_save);
+}
+
+void
+vcpu_intel_x64_hyperkernel::schedule(process_intel_x64 *proc, thread_intel_x64 *thrd, state_save_intel_x64 *state_save)
+{
     // TODO:
     //
-    // Checking for null is a total hack at the moment. This needs to be
-    // cleaned up. At the moment, this only supports running a single process
-    // without preemption.
+    // In v1.2, we need to break up the state save so that we are only copying
+    // the bits that we need to.
     //
 
-    if (thrd == nullptr)
+    if (thrd != nullptr)
     {
-        run();
+        auto old_vcpuid = m_state_save->vcpuid;
+        auto old_vmxon_ptr = m_state_save->vmxon_ptr;
+        auto old_vmcs_ptr = m_state_save->vmcs_ptr;
+        auto old_exit_handler_ptr = m_state_save->exit_handler_ptr;
+
+        *m_state_save = *state_save;
+
+        m_state_save->vcpuid = old_vcpuid;
+        m_state_save->vmxon_ptr = old_vmxon_ptr;
+        m_state_save->vmcs_ptr = old_vmcs_ptr;
+        m_state_save->exit_handler_ptr = old_exit_handler_ptr;
+
+        if (this->is_running())
+            m_vmcs_hyperkernel->set_eptp(proc->eptp());
+        else
+            m_state_save->user1 = proc->eptp();
     }
-    else
-    {
-        m_state_save->rip = thrd->entry();
-        m_state_save->rsp = thrd->stack();
-        m_state_save->rdi = thrd->arg1();
-        m_state_save->rsi = thrd->arg2();
 
-        m_state_save->user1 = proc->eptp();
-
-        m_exit_handler_hyperkernel->set_current_process(proc);
-
-        run();
-    }
+    m_exit_handler_hyperkernel->set_current_thread(thrd);
+    run();
 }
 
 vcpuid::type

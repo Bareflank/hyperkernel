@@ -27,9 +27,12 @@
 
 #include <task/task.h>
 #include <vcpu/vcpu_intel_x64.h>
+#include <exit_handler/state_save_intel_x64.h>
 
 class process_list;
 class domain_intel_x64;
+class thread_intel_x64;
+class process_intel_x64;
 class vmcs_intel_x64_hyperkernel;
 class exit_handler_intel_x64_hyperkernel;
 
@@ -155,6 +158,33 @@ public:
     /// @ensures none
     ///
     void schedule() override;
+
+    /// Schedule
+    ///
+    /// Executes this vCPU.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param thrd the thread to execute
+    /// @param entry the entry function to execute
+    /// @param arg1 the first arg to pass
+    /// @param arg2 the second arg to pass
+    ///
+    void schedule(thread *thrd, uintptr_t entry, uintptr_t arg1, uintptr_t arg2) override;
+
+    /// Schedule
+    ///
+    /// Executes this vCPU.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param proc the process to execute
+    /// @param thrd the thread to execute
+    /// @param state_save the state save for the process
+    ///
+    void schedule(process_intel_x64 *proc, thread_intel_x64 *thrd, state_save_intel_x64 *state_save);
 
     /// Next vCPU ID
     ///

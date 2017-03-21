@@ -22,10 +22,14 @@
 #ifndef THREAD_H
 #define THREAD_H
 
+#include <gsl/gsl>
+
 #include <memory>
 
 #include <user_data.h>
 #include <threadid.h>
+
+class process;
 
 class thread : public user_data
 {
@@ -37,8 +41,9 @@ public:
     /// @ensures none
     ///
     /// @param id the id of the thread
+    /// @param proc the process that owns this thread
     ///
-    thread(threadid::type id);
+    thread(threadid::type id, gsl::not_null<process *> proc);
 
     /// Destructor
     ///
@@ -87,10 +92,27 @@ public:
     ///
     virtual void hlt(user_data *data = nullptr);
 
-    void set_info(uintptr_t entry,
-                  uintptr_t stack,
-                  uintptr_t arg1,
-                  uintptr_t arg2);
+    /// Set Thread Info
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @param entry the entry point of the thread
+    /// @param stack the thread's stack
+    /// @param arg1 the first arg passed to the thread
+    /// @param arg2 the second arg passed to the thread
+    ///
+    virtual void set_info(uintptr_t entry, uintptr_t stack, uintptr_t arg1, uintptr_t arg2) = 0;
+
+    /// Thread Process
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    /// @return the thread's process
+    ///
+    virtual gsl::not_null<process *> proc() const
+    { return m_proc; }
 
     /// Thread Id
     ///
@@ -122,26 +144,10 @@ public:
     virtual bool is_initialized()
     { return m_is_initialized; }
 
-    virtual uintptr_t entry() const
-    { return m_entry; }
-
-    virtual uintptr_t stack() const
-    { return m_stack; }
-
-    virtual uintptr_t arg1() const
-    { return m_arg1; }
-
-    virtual uintptr_t arg2() const
-    { return m_arg2; }
-
 private:
 
     threadid::type m_id;
-
-    uintptr_t m_entry;
-    uintptr_t m_stack;
-    uintptr_t m_arg1;
-    uintptr_t m_arg2;
+    process *m_proc;
 
     bool m_is_running;
     bool m_is_initialized;

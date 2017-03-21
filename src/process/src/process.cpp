@@ -156,7 +156,7 @@ process::__add_thread(threadid::type threadid, user_data *data)
     if (__get_thread(threadid))
         throw std::runtime_error("thread already exists: " + std::to_string(threadid));
 
-    if (auto && thread = m_thread_factory->make_thread(threadid, data))
+    if (auto && thread = m_thread_factory->make_thread(threadid, this, data))
     {
         std::lock_guard<std::mutex> guard(m_thread_mutex);
         return m_threads[threadid] = std::move(thread);

@@ -19,12 +19,12 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#include <thread/thread.h>
 #include <thread/thread_factory.h>
+#include <thread/thread_intel_x64.h>
 
 std::unique_ptr<thread>
-thread_factory::make_thread(threadid::type threadid, user_data *data)
+thread_factory::make_thread(threadid::type threadid, gsl::not_null<process *> proc, user_data *data)
 {
     (void) data;
-    return std::make_unique<thread>(threadid);
+    return std::make_unique<thread_intel_x64>(threadid, proc);
 }

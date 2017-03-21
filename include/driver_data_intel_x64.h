@@ -19,33 +19,40 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#ifndef PROCESS_LIST_DATA_H
-#define PROCESS_LIST_DATA_H
+#ifndef DRIVER_DATA_INTEL_X64_H
+#define DRIVER_DATA_INTEL_X64_H
 
-#include <gsl/gsl>
 #include <user_data.h>
 
-class domain;
+class domain_intel_x64;
+class thread_intel_x64;
+class process_list;
 
-class process_list_data : public user_data
+class driver_data_intel_x64 : public user_data
 {
 public:
 
-    process_list_data() noexcept :
-        m_domain(nullptr)
+    driver_data_intel_x64() noexcept :
+        m_entry(0),
+        m_domain(nullptr),
+        m_thread(nullptr),
+        m_proclt(nullptr)
     { }
 
-    ~process_list_data() override = default;
+    ~driver_data_intel_x64() override = default;
 
-    domain *m_domain;
+    uintptr_t m_entry;
+    domain_intel_x64 *m_domain;
+    thread_intel_x64 *m_thread;
+    process_list *m_proclt;
 
 public:
 
-    process_list_data(process_list_data &&) = default;
-    process_list_data &operator=(process_list_data &&) = default;
+    driver_data_intel_x64(driver_data_intel_x64 &&) = default;
+    driver_data_intel_x64 &operator=(driver_data_intel_x64 &&) = default;
 
-    process_list_data(const process_list_data &) = delete;
-    process_list_data &operator=(const process_list_data &) = delete;
+    driver_data_intel_x64(const driver_data_intel_x64 &) = delete;
+    driver_data_intel_x64 &operator=(const driver_data_intel_x64 &) = delete;
 };
 
 #endif
