@@ -56,6 +56,14 @@ public:
     /// @return returns a pointer to a newly created process_list.
     ///
     virtual std::unique_ptr<process_list> make_process_list(processlistid::type processlistid, user_data *data = nullptr);
+
+public:
+
+    process_list_factory(process_list_factory &&) = default;
+    process_list_factory &operator=(process_list_factory &&) = default;
+
+    process_list_factory(const process_list_factory &) = delete;
+    process_list_factory &operator=(const process_list_factory &) = delete;
 };
 
 #endif

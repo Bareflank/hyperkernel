@@ -56,6 +56,14 @@ public:
     /// @return returns a pointer to a newly created domain.
     ///
     virtual std::unique_ptr<domain> make_domain(domainid::type domainid, user_data *data = nullptr);
+
+public:
+
+    domain_factory(domain_factory &&) = default;
+    domain_factory &operator=(domain_factory &&) = default;
+
+    domain_factory(const domain_factory &) = delete;
+    domain_factory &operator=(const domain_factory &) = delete;
 };
 
 #endif

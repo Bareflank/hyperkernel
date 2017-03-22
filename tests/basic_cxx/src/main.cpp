@@ -22,13 +22,29 @@
 
 #include <vector>
 #include <iostream>
+#include <exception>
 
 int
 main(int argc, const char *argv[])
 {
+    std::vector<int> numbers = {4, 8, 15, 16, 23, 42};
+
     (void) argc;
     (void) argv;
 
-    std::cout << "hello world\n";
+    try
+    {
+        throw std::runtime_error("error");
+    }
+    catch (std::exception &e)
+    { }
+
+    std::cout << "Which one was \"Ford\"? ";
+
+    for (auto num : numbers)
+        std::cout << num << " ";
+
+    std::cout << "\n";
+
     return 0;
 }

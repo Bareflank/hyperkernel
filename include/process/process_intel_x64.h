@@ -96,8 +96,8 @@ public:
 
     friend class hyperkernel_ut;
 
-    process_intel_x64(process_intel_x64 &&) = default;
-    process_intel_x64 &operator=(process_intel_x64 &&) = default;
+    process_intel_x64(process_intel_x64 &&) = delete;
+    process_intel_x64 &operator=(process_intel_x64 &&) = delete;
 
     process_intel_x64(const process_intel_x64 &) = delete;
     process_intel_x64 &operator=(const process_intel_x64 &) = delete;

@@ -214,6 +214,14 @@ private:
 
     intel_x64::msrs::value_type m_ia32_pat_msr;
     intel_x64::msrs::value_type m_ia32_efer_msr;
+
+public:
+
+    vmcs_intel_x64_guest_vm_state(vmcs_intel_x64_guest_vm_state &&) = default;
+    vmcs_intel_x64_guest_vm_state &operator=(vmcs_intel_x64_guest_vm_state &&) = default;
+
+    vmcs_intel_x64_guest_vm_state(const vmcs_intel_x64_guest_vm_state &) = delete;
+    vmcs_intel_x64_guest_vm_state &operator=(const vmcs_intel_x64_guest_vm_state &) = delete;
 };
 
 #endif

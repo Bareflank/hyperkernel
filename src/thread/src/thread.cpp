@@ -22,8 +22,9 @@
 #include <debug.h>
 #include <thread/thread.h>
 
-thread::thread(threadid::type id) :
+thread::thread(threadid::type id, gsl::not_null<process *> proc) :
     m_id(id),
+    m_proc(proc),
     m_is_running(false),
     m_is_initialized(false)
 {
@@ -64,22 +65,4 @@ thread::hlt(user_data *data)
     (void) data;
 
     m_is_running = false;
-}
-
-void
-thread::set_info(uintptr_t entry,
-                 uintptr_t stack,
-                 uintptr_t arg1,
-                 uintptr_t arg2)
-{
-    m_entry = entry;
-    m_stack = stack;
-    m_arg1 = arg1;
-    m_arg2 = arg2;
-
-    // bfdebug << "[thread #" << id() << "]: setting info\n";
-    // bfdebug << "  - entry: " << view_as_pointer(m_entry) << '\n';
-    // bfdebug << "  - stack: " << view_as_pointer(m_stack) << '\n';
-    // bfdebug << "  - arg1: " << view_as_pointer(m_arg1) << '\n';
-    // bfdebug << "  - arg2: " << view_as_pointer(m_arg2) << '\n';
 }

@@ -27,12 +27,14 @@
 #include <coreid.h>
 #include <vcpuid.h>
 #include <domainid.h>
+#include <driver_data_intel_x64.h>
 
 #include <vmcs/vmcs_intel_x64_hyperkernel.h>
 #include <exit_handler/exit_handler_intel_x64_eapis.h>
 
 class process_list;
 class domain_intel_x64;
+class thread_intel_x64;
 class process_intel_x64;
 
 class exit_handler_intel_x64_hyperkernel : public exit_handler_intel_x64_eapis
@@ -97,15 +99,15 @@ public:
     virtual gsl::not_null<domain_intel_x64 *> get_domain() const
     { return m_domain; }
 
-    /// Set Current Process
+    /// Set Current Thread
     ///
     /// @expects none
     /// @ensures none
     ///
-    /// @param proc the current process
+    /// @param thrd the current thread
     ///
-    virtual void set_current_process(process_intel_x64 *proc)
-    { m_process = proc; }
+    virtual void set_current_thread(thread_intel_x64 *thrd)
+    { m_thread = thrd; }
 
 protected:
 
@@ -127,10 +129,15 @@ protected:
     void set_thread_info(vmcall_registers_t &regs);
 
     void sched_yield(vmcall_registers_t &regs);
+    void sched_yield_and_remove(vmcall_registers_t &regs);
 
     void set_program_break(vmcall_registers_t &regs);
     void increase_program_break(vmcall_registers_t &regs);
     void decrease_program_break(vmcall_registers_t &regs);
+
+    void handle_ttys0(vmcall_registers_t &regs);
+    void handle_ttys1(vmcall_registers_t &regs);
+    void register_ttys0(vmcall_registers_t &regs);
 
 private:
 
@@ -139,7 +146,9 @@ private:
     gsl::not_null<process_list *> m_proclt;
     gsl::not_null<domain_intel_x64 *> m_domain;
 
-    process_intel_x64 *m_process;
+    thread_intel_x64 *m_thread;
+
+    driver_data_intel_x64 m_ttys0;
 
 public:
 

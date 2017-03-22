@@ -22,7 +22,7 @@
 #ifndef PROCESSLISTID_H
 #define PROCESSLISTID_H
 
-#include <stdint.h>
+#include <cstdint>
 
 // *INDENT-OFF*
 

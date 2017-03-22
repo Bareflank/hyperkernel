@@ -8,6 +8,43 @@ dist: trusty
 sudo: required
 
 #
+# Compilers
+#
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - llvm-toolchain-trusty-3.8
+      - llvm-toolchain-trusty-3.9
+    packages:
+      - clang-3.8
+      - clang-3.9
+      - clang-tidy-3.8
+      - clang-tidy-3.9
+      - gcc-5
+      - g++-5
+      - nasm
+
+#
+# Update Build Environment
+#
+before_install:
+  - mkdir $HOME/usr
+  - export PATH="$HOME/usr/bin:$PATH"
+  - wget https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.sh
+  - chmod +x cmake-3.7.2-Linux-x86_64.sh
+  - ./cmake-3.7.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 100
+  - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-5 100
+  - sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-3.8 100
+  - cd ..
+  - git clone https://github.com/bareflank/hypervisor.git
+  - mv hyperkernel hypervisor/
+  - cd hypervisor
+  - git clone https://github.com/bareflank/extended_apis.git
+
+#
 # Build Matrix
 #
 matrix:
@@ -19,12 +56,6 @@ matrix:
   - os: linux
     env:
       - TEST="Astyle"
-    before_install:
-      - cd ..
-      - git clone https://github.com/bareflank/hypervisor.git
-      - mv hyperkernel hypervisor/
-      - cd hypervisor
-      - git clone https://github.com/bareflank/extended_apis.git
     script:
       - if [[ -n $(./tools/astyle/run.sh | grep Formatted) ]]; then echo "You must run astyle before submitting a pull request"; exit -1; fi
 
@@ -34,12 +65,6 @@ matrix:
   - os: linux
     env:
       - TEST="Doxygen"
-    before_install:
-      - cd ..
-      - git clone https://github.com/bareflank/hypervisor.git
-      - mv hyperkernel hypervisor/
-      - cd hypervisor
-      - git clone https://github.com/bareflank/extended_apis.git
     script:
       - ./configure
       - make doxygen
@@ -54,60 +79,17 @@ matrix:
     script:
       - if [[ -n $(git diff --check HEAD^) ]]; then echo "You must remove whitespace before submitting a pull request"; exit -1; fi
 
-  # #
-  # # Codecov
-  # #
-  # - os: linux
-  #   env:
-  #     - TEST="Codecov"
-  #   services:
-  #     - docker
-  #   before_install:
-  #     - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  #     - sudo add-apt-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.8 main" -y
-  #     - sudo apt-get update
-  #     - sudo apt-get install --yes clang-3.8
-  #     - sudo apt-get install --yes llvm-3.8
-  #     - cd ..
-  #     - git clone https://github.com/bareflank/hypervisor.git
-  #     - mv hyperkernel hypervisor/
-  #     - cd hypervisor
-  #     - git clone https://github.com/bareflank/extended_apis.git
-  #   install:
-  #     - travis_wait 40 ./tools/scripts/setup_ubuntu.sh
-  #   script:
-  #     - CC=clang-3.8 CXX=clang++-3.8 COVERALLS=true make
-  #     - make test
-  #   after_success:
-  #     - cd hyperkernel
-  #     - ./tools/codecov/codecov.sh -s . -p ../makefiles/hyperkernel/ -c -x ./tools/codecov/llvm-gcov.sh
-
   #
   # Clang Tidy
   #
   - os: linux
     env:
       - TEST="Clang Tidy"
-    services:
-      - docker
-    before_install:
-      - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-      - sudo add-apt-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.8 main" -y
-      - sudo apt-get update
-      - sudo apt-get install --yes clang-3.8
-      - sudo apt-get install --yes clang-tidy-3.8
-      - sudo apt-get install --yes llvm-3.8
-      - cd ..
-      - git clone https://github.com/bareflank/hypervisor.git
-      - mv hyperkernel hypervisor/
-      - cd hypervisor
-      - git clone https://github.com/bareflank/extended_apis.git
     install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.8
       - git clone https://github.com/rizsotto/bear.git
-      - pushd bear; cmake .; make; sudo make install; popd
-      - sudo ln -s /usr/bin/clang-tidy-3.8 /usr/bin/clang-tidy
+      - pushd bear; git reset --hard 37b96a184f32b859c8f25ea2dc0d3f07242a9a98; cmake .; make; sudo make install; popd
     script:
+      - ./configure --compiler clang-3.8
       - STATIC_ANALYSIS_ENABLED=true bear make
       - HYPERKERNEL_EXTENSION=true make tidy
 
@@ -117,17 +99,8 @@ matrix:
   - os: linux
     env:
       - TEST="Google Sanitizers"
-    services:
-      - docker
-    before_install:
-      - cd ..
-      - git clone https://github.com/bareflank/hypervisor.git
-      - mv hyperkernel hypervisor/
-      - cd hypervisor
-      - git clone https://github.com/bareflank/extended_apis.git
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.8
     script:
+      - ./configure --compiler clang-3.8
       - DYNAMIC_ANALYSIS_ENABLED=true make
       - make test
 
@@ -137,18 +110,8 @@ matrix:
   - os: linux
     env:
       - TEST="Clang 3.8"
-    services:
-      - docker
-    before_install:
-      - cd ..
-      - git clone https://github.com/bareflank/hypervisor.git
-      - mv hyperkernel hypervisor/
-      - cd hypervisor
-      - git clone https://github.com/bareflank/extended_apis.git
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.8
-      - cat env.sh
     script:
+      - ./configure --compiler clang-3.8
       - make
       - make test
 
@@ -158,17 +121,7 @@ matrix:
   - os: linux
     env:
       - TEST="Clang 3.9"
-    services:
-      - docker
-    before_install:
-      - cd ..
-      - git clone https://github.com/bareflank/hypervisor.git
-      - mv hyperkernel hypervisor/
-      - cd hypervisor
-      - git clone https://github.com/bareflank/extended_apis.git
-    install:
-      - travis_wait 40 ./tools/scripts/setup_ubuntu.sh --compiler clang-3.9
-      - cat env.sh
     script:
+      - ./configure --compiler clang-3.9
       - make
       - make test

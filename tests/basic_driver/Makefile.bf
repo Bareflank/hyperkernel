@@ -23,9 +23,7 @@
 # Subdirs
 ################################################################################
 
-PARENT_SUBDIRS += basic_c
-PARENT_SUBDIRS += basic_cxx
-PARENT_SUBDIRS += basic_driver
+SUBDIRS += src
 
 ################################################################################
 # Common

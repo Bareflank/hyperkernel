@@ -105,8 +105,8 @@ public:
 
     friend class hyperkernel_ut;
 
-    domain_manager(domain_manager &&) = default;
-    domain_manager &operator=(domain_manager &&) = default;
+    domain_manager(domain_manager &&) = delete;
+    domain_manager &operator=(domain_manager &&) = delete;
 
     domain_manager(const domain_manager &) = delete;
     domain_manager &operator=(const domain_manager &) = delete;

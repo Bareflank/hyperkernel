@@ -37,8 +37,13 @@ protected:
     bool fini() override;
     bool list() override;
 
-private:
+public:
 
+    hyperkernel_ut(hyperkernel_ut &&) = default;
+    hyperkernel_ut &operator=(hyperkernel_ut &&) = default;
+
+    hyperkernel_ut(const hyperkernel_ut &) = delete;
+    hyperkernel_ut &operator=(const hyperkernel_ut &) = delete;
 };
 
 

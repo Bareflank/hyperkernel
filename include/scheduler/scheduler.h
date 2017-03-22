@@ -106,6 +106,15 @@ public:
     ///
     virtual void yield();
 
+    /// Yield
+    ///
+    /// Yields the current task and schedules the next one.
+    ///
+    /// @expects none
+    /// @ensures none
+    ///
+    virtual void schedule(thread *thrd, uintptr_t entry, uintptr_t arg1, uintptr_t arg2);
+
 private:
 
     schedulerid::type m_id;

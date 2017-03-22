@@ -48,6 +48,14 @@ public:
 
     process_list *m_proclt;
     domain_intel_x64 *m_domain;
+
+public:
+
+    vcpu_data_intel_x64(vcpu_data_intel_x64 &&) = default;
+    vcpu_data_intel_x64 &operator=(vcpu_data_intel_x64 &&) = default;
+
+    vcpu_data_intel_x64(const vcpu_data_intel_x64 &) = delete;
+    vcpu_data_intel_x64 &operator=(const vcpu_data_intel_x64 &) = delete;
 };
 
 #endif

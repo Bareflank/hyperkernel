@@ -33,6 +33,7 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
+#include <cstdlib>
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -40,16 +41,10 @@
 
 using func_t = int (*)(int);
 
-auto g_ld_library_path =
-{
-    "/home/user/hypervisor/sysroot_vmapp/x86_64-vmapp-elf/lib/"_s,
-    "/home/user/hypervisor/sysroot_vmapp/x86_64-vmapp-elf/lib/cross/"_s
-};
-
 bool
 exists(const std::string &name)
 {
-    struct stat buffer;
+    struct stat buffer = {};
     return stat(name.c_str(), &buffer) == 0;
 }
 
@@ -105,9 +100,16 @@ process::process(const std::string &filename, processlistid::type procltid) :
     m_info_addr(0x00200000UL),
     m_virt_addr(0x00600000UL),
     m_filename(filename),
-    m_basename(basename(filename))
+    m_basename(basename(filename)),
+    m_loader{}
 {
     auto ret = 0L;
+
+    auto g_ld_library_path =
+    {
+        "/hypervisor/sysroot_vmapp/x86_64-vmapp-elf/lib/"_s,
+        "/hypervisor/sysroot_vmapp/x86_64-vmapp-elf/lib/cross/"_s
+    };
 
     if (m_id == processid::invalid)
         throw std::runtime_error("vmcall__create_process failed");
@@ -124,7 +126,8 @@ process::process(const std::string &filename, processlistid::type procltid) :
 
         for (const auto &path : g_ld_library_path)
         {
-            auto &&fullpath = path + needed;
+            auto &&home = std::getenv("HOME");
+            auto &&fullpath = home + path + needed;
             if (exists(fullpath))
             {
                 load_elf(fullpath);
@@ -145,7 +148,7 @@ process::process(const std::string &filename, processlistid::type procltid) :
 
     for (const auto &ef : m_elfs)
     {
-        section_info_t info;
+        section_info_t info = {};
 
         ret = bfelf_file_get_section_info(ef.get(), &info);
         if (ret != BFELF_SUCCESS)

@@ -54,10 +54,7 @@ protected_main(const arg_list_type &args)
         g_vcpus.push_back(std::make_unique<vcpu>(g_proclt->id()));
 
     for (const auto &arg : args)
-    {
         g_processes.push_back(std::make_unique<process>(arg, g_proclt->id()));
-        g_processes.push_back(std::make_unique<process>(arg, g_proclt->id()));
-    }
 
     if (!vmcall__sched_yield())
         throw std::runtime_error("vmcall__sched_yield failed");

@@ -107,6 +107,8 @@ process_list::delete_process(processid::type processid, user_data *data)
     auto ___ = gsl::finally([&]
     {
         std::lock_guard<std::mutex> guard(m_process_mutex);
+
+        m_process_list.remove(m_process_next_id);
         m_processes.erase(processid);
     });
 
@@ -118,14 +120,30 @@ gsl::not_null<process *>
 process_list::get_process(processid::type processid)
 { return __get_process(processid).get(); }
 
+void
+process_list::remove_process(processid::type processid)
+{ m_process_list.remove(processid); }
+
 std::pair<thread *, process *>
 process_list::next_job()
 {
-    if (m_processes.empty())
+    // TODO:
+    //
+    // - We need to implement a real algorithm for determining the next job
+    // - We need to figure out which thread to execute and not just #0
+    //
+
+    if (m_process_list.empty())
         return {};
 
-    auto && proc = m_processes.begin()->second.get();
+    auto && proc = m_processes.at(m_process_list.front()).get();
     auto && thrd = proc->get_thread(0);
+
+    if (m_process_list.size() > 1)
+    {
+        m_process_list.push_back(m_process_list.front());
+        m_process_list.pop_front();
+    }
 
     return {thrd, proc};
 }
@@ -142,6 +160,8 @@ process_list::__add_process(processid::type processid, user_data *data)
     if (auto && process = m_process_factory->make_process(processid, data))
     {
         std::lock_guard<std::mutex> guard(m_process_mutex);
+
+        m_process_list.push_back(processid);
         return m_processes[processid] = std::move(process);
     }
 

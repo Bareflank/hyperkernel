@@ -19,6 +19,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+#include <algorithm>
 #include <scheduler/scheduler.h>
 
 scheduler::scheduler(schedulerid::type id) :
@@ -39,12 +40,15 @@ scheduler::add_task(gsl::not_null<task *> tk)
 
 void
 scheduler::remove_task(gsl::not_null<task *> tk)
-{ m_tasks.remove(tk); }
+{
+    auto &&iter = find(m_tasks.begin(), m_tasks.end(), tk.get());
+    m_tasks.erase(iter);
+}
 
 void
 scheduler::yield()
 {
-    // FUTURE:
+    // TODO:
     //
     // This needs to be updated in several ways:
     //
@@ -59,11 +63,22 @@ scheduler::yield()
     if (m_tasks.empty())
         throw std::runtime_error("scheduler is empty");
 
-    if (m_tasks.size() > 1)
+    if (m_tasks.size() > 1 && m_tasks.front()->num_jobs() == 0)
     {
         m_tasks.push_back(m_tasks.front());
         m_tasks.pop_front();
     }
 
     m_tasks.front()->schedule();
+}
+
+void
+scheduler::schedule(thread *thrd, uintptr_t entry, uintptr_t arg1, uintptr_t arg2)
+{
+    // TODO
+    //
+    // Need to know what task we should be executing.
+    //
+
+    m_tasks.front()->schedule(thrd, entry, arg1, arg2);
 }

@@ -55,3 +55,6 @@ task::~task()
     m_proclt->remove_vcpu(m_vcpuid);
     g_shm->remove_task(m_coreid, this);
 }
+
+size_t task::num_jobs()
+{ return m_proclt->num_jobs(); }

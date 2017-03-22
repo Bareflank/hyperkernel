@@ -1,5 +1,3 @@
-REQUIRED_BINARY_LINKER_ARGS="--no-dynamic-linker"
-
 if [[ $CXX_COMPILER == "true" ]] && [[ -f "$BUILD_ABS/sysroot_vmapp/x86_64-vmapp-elf/lib/libc++.so.1.0" ]]; then
     REQUIRED_BINARY_LINKER_ARGS="$REQUIRED_LINKER_ARGS -lc++ -lpthread -lbfunwind"
 fi

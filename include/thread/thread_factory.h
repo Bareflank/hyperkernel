@@ -54,10 +54,19 @@ public:
     /// @ensures none
     ///
     /// @param threadid the threadid for the thread to create
+    /// @param proc the process that owns this thread
     /// @param data user data passed to the thread
     /// @return returns a pointer to a newly created thread.
     ///
-    virtual std::unique_ptr<thread> make_thread(threadid::type threadid, user_data *data = nullptr);
+    virtual std::unique_ptr<thread> make_thread(threadid::type threadid, gsl::not_null<process *> proc, user_data *data = nullptr);
+
+public:
+
+    thread_factory(thread_factory &&) = default;
+    thread_factory &operator=(thread_factory &&) = default;
+
+    thread_factory(const thread_factory &) = delete;
+    thread_factory &operator=(const thread_factory &) = delete;
 };
 
 #endif

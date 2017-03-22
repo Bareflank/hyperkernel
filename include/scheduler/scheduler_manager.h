@@ -135,8 +135,8 @@ public:
 
     friend class hyperkernel_ut;
 
-    scheduler_manager(scheduler_manager &&) = default;
-    scheduler_manager &operator=(scheduler_manager &&) = default;
+    scheduler_manager(scheduler_manager &&) = delete;
+    scheduler_manager &operator=(scheduler_manager &&) = delete;
 
     scheduler_manager(const scheduler_manager &) = delete;
     scheduler_manager &operator=(const scheduler_manager &) = delete;

@@ -65,6 +65,7 @@ NATIVE_OUTDIR+=%BUILD_REL%/../bin
 ################################################################################
 
 SOURCES+=thread.cpp
+SOURCES+=thread_intel_x64.cpp
 
 INCLUDE_PATHS+=../../../include
 INCLUDE_PATHS+=%HYPER_ABS%/include/
