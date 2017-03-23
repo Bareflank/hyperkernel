@@ -29,14 +29,13 @@
 #include <process_list.h>
 #include <vmcall_hyperkernel_interface.h>
 
-#include <sched.h>
-#include <sys/types.h>
-
 using arg_list_type = std::vector<std::string>;
 
 std::unique_ptr<process_list> g_proclt;
 std::vector<std::unique_ptr<vcpu>> g_vcpus;
 std::vector<std::unique_ptr<process>> g_processes;
+
+extern "C" int set_affinity(void);
 
 int
 protected_main(const arg_list_type &args)
@@ -47,6 +46,9 @@ protected_main(const arg_list_type &args)
         g_vcpus.clear();
         g_proclt.reset();
     });
+
+    if (set_affinity() != 0)
+        throw std::runtime_error("failed to set cpu affinity");
 
     g_proclt = std::make_unique<process_list>();
 

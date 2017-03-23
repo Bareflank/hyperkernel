@@ -52,13 +52,8 @@ template<class T>
 T *
 malloc_aligned(std::size_t size)
 {
-    int ret = 0;
-    void *ptr = nullptr;
-
-    ret = posix_memalign(&ptr, 0x1000, size);
-    (void) ret;
-
-    return static_cast<T *>(memset(ptr, 0, size));
+    auto addr = aligned_alloc(0x1000, size);
+    return static_cast<T *>(memset(addr, 0, size));
 }
 
 struct match_separator
