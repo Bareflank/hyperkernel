@@ -38,6 +38,10 @@ NATIVE_LDFLAGS+=
 NATIVE_ARFLAGS+=
 NATIVE_DEFINES+=
 
+ifeq ($(OS), Windows_NT)
+    NATIVE_ASMFLAGS+=-d MS64
+endif
+
 ################################################################################
 # Output
 ################################################################################
@@ -53,6 +57,7 @@ SOURCES+=main.cpp
 SOURCES+=vcpu.cpp
 SOURCES+=process.cpp
 SOURCES+=process_list.cpp
+SOURCES+=set_affinity.c
 SOURCES+=%HYPER_ABS%/common/vmcall_intel_x64.asm
 
 INCLUDE_PATHS+=./
