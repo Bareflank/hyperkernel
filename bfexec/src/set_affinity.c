@@ -20,7 +20,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#if defined(__WIN32__) || defined(__CYGWIN32__)
+#ifdef OS_WINDOWS
 
 #include <windows.h>
 
