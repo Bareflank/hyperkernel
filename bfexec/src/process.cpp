@@ -102,8 +102,8 @@ process::process(const std::string &filename, processlistid::type procltid) :
 
     auto g_ld_library_path =
     {
-        "/hypervisor/sysroot_vmapp/x86_64-vmapp-elf/lib/"_s,
-        "/hypervisor/sysroot_vmapp/x86_64-vmapp-elf/lib/cross/"_s
+        "./sysroot_vmapp/x86_64-vmapp-elf/lib/"_s,
+        "./sysroot_vmapp/x86_64-vmapp-elf/lib/cross/"_s
     };
 
     if (m_id == processid::invalid)
@@ -115,20 +115,25 @@ process::process(const std::string &filename, processlistid::type procltid) :
     for (auto i = 0; i < bfelf_file_get_num_needed(elf); i++)
     {
         const char *needed;
+        auto found_lib = false;
+        
         ret = bfelf_file_get_needed(elf, static_cast<uint64_t>(i), &needed);
         if (ret != BFELF_SUCCESS)
             throw std::runtime_error("bfelf_file_get_needed failed");
 
         for (const auto &path : g_ld_library_path)
         {
-            auto &&home = std::getenv("HOME");
-            auto &&fullpath = home + path + needed;
+            auto &&fullpath = path + needed;
             if (exists(fullpath))
             {
                 load_elf(fullpath);
+                found_lib = true;
                 break;
             }
         }
+        
+        if (!found_lib)
+            throw std::runtime_error("unable to find: "_s + needed);
     }
 
     ret = bfelf_loader_relocate(&m_loader);
