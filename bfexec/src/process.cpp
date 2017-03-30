@@ -116,7 +116,7 @@ process::process(const std::string &filename, processlistid::type procltid) :
     {
         const char *needed;
         auto found_lib = false;
-        
+
         ret = bfelf_file_get_needed(elf, static_cast<uint64_t>(i), &needed);
         if (ret != BFELF_SUCCESS)
             throw std::runtime_error("bfelf_file_get_needed failed");
@@ -131,7 +131,7 @@ process::process(const std::string &filename, processlistid::type procltid) :
                 break;
             }
         }
-        
+
         if (!found_lib)
             throw std::runtime_error("unable to find: "_s + needed);
     }
