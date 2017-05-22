@@ -34,7 +34,7 @@ extern "C" {
 struct crt_info
 {
     int argc;
-    char *argv;
+    char **argv;
 
     uintptr_t program_break;
 

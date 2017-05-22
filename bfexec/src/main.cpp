@@ -20,9 +20,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include <gsl/gsl>
+#include <unistd.h>
 
 #include <vector>
 #include <memory>
+#include <iostream>
 
 #include <vcpu.h>
 #include <process.h>
@@ -35,11 +37,16 @@ std::unique_ptr<process_list> g_proclt;
 std::vector<std::unique_ptr<vcpu>> g_vcpus;
 std::vector<std::unique_ptr<process>> g_processes;
 
-extern "C" int set_affinity(void);
+extern "C" int set_affinity(long int core);
 
 int
-protected_main(const arg_list_type &args)
+protected_main(int argc, const char **argv)
 {
+    long int core = strtol(argv[0], NULL, 0);
+    if (core > 31 || core < 0) {
+        throw std::invalid_argument("bfexec: need 0 <= core < 32");
+    }
+
     auto ___ = gsl::finally([&]
     {
         g_processes.clear();
@@ -47,16 +54,12 @@ protected_main(const arg_list_type &args)
         g_proclt.reset();
     });
 
-    if (set_affinity() != 0)
+    if (set_affinity(core) != 0)
         throw std::runtime_error("failed to set cpu affinity");
 
     g_proclt = std::make_unique<process_list>();
-
-    for (auto i = 0; i < 1; i++)
-        g_vcpus.push_back(std::make_unique<vcpu>(g_proclt->id()));
-
-    for (const auto &arg : args)
-        g_processes.push_back(std::make_unique<process>(arg, g_proclt->id()));
+    g_vcpus.push_back(std::make_unique<vcpu>(g_proclt->id()));
+    g_processes.push_back(std::make_unique<process>(argc, &argv[1], g_proclt->id()));
 
     if (!vmcall__sched_yield())
         throw std::runtime_error("vmcall__sched_yield failed");
@@ -84,24 +87,23 @@ main(int argc, const char *argv[])
     std::set_terminate(terminate);
     std::set_new_handler(new_handler);
 
+    if (argc < 3) {
+        std::cerr << "bfexec: need argc >= 3\n";
+        exit(22);
+    }
+
     try
     {
-        arg_list_type args;
-        auto args_span = gsl::make_span(argv, argc);
-
-        for (auto i = 1; i < argc; i++)
-            args.push_back(args_span.at(i));
-
-        return protected_main(args);
+        return protected_main(argc - 2, &argv[1]);
     }
     catch (std::exception &e)
     {
-        std::cerr << "Caught unhandled exception:" << '\n';
-        std::cerr << "    - what(): " << e.what() << '\n';
+        std::cerr << "bfexec: caught unhandled exception" << '\n';
+        std::cerr << "    - what() = " << e.what() << '\n';
     }
     catch (...)
     {
-        std::cerr << "Caught unknown exception" << '\n';
+        std::cerr << "bfexec: caught unknown exception" << '\n';
     }
 
     return EXIT_FAILURE;

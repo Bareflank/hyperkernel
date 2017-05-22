@@ -35,7 +35,7 @@ class process
 {
 public:
 
-    process(const std::string &filename, processlistid::type procltid);
+    process(int argc, const char **argv, processlistid::type procltid);
     ~process();
 
     gsl::not_null<bfelf_file_t *> load_elf(const std::string &filename);
@@ -51,6 +51,9 @@ private:
     std::string m_filename;
     std::string m_basename;
 
+    std::size_t m_argv_size;
+    std::unique_ptr<char> m_argv;
+
     bfelf_loader_t m_loader;
 
     std::unique_ptr<char> m_stack;
@@ -58,6 +61,9 @@ private:
 
     std::vector<std::unique_ptr<char>> m_segments;
     std::vector<std::unique_ptr<bfelf_file_t>> m_elfs;
+
+    void argv_size(int argc, const char **argv, std::size_t limit);
+    void init_argv(int argc, const char **argv, uintptr_t vm_virt, std::size_t limit);
 
 public:
 

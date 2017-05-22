@@ -46,7 +46,7 @@ _start(struct crt_info *info)
     // place the arguments into some allocated memory, and pass the string
     // information as well as the number of args.
 
-    int ret = main(0, 0);
+    int ret = main(info->argc, info->argv);
 
     for (i = 0; i < info->info_num; i++)
         local_fini(&info->info[i]);
