@@ -89,13 +89,49 @@ read_binary(const std::string &filename)
 // Implementation
 // -----------------------------------------------------------------------------
 
-process::process(const std::string &filename, processlistid::type procltid) :
+void
+process::argv_size(int argc, const char **argv, std::size_t limit)
+{
+    for (int i = 0; i < argc; i++) {
+        m_argv_size += std::strlen(argv[i]) + 1;
+    }
+    m_argv_size += static_cast<std::size_t>(argc) * sizeof(char *);
+
+    if (m_argv_size > limit) {
+       throw std::runtime_error("bfexec: need m_argv_size <= limit");
+    }
+}
+
+void
+process::init_argv(int argc, const char **argv, uintptr_t vm_virt, std::size_t limit)
+{
+    m_argv = std::unique_ptr<char>(malloc_aligned<char>(limit));
+
+    char *arg = m_argv.get();
+    if (arg == nullptr) {
+       throw std::runtime_error("bfexec: need m_argv.get() != nullptr");
+    }
+
+    uintptr_t *addr = reinterpret_cast<uintptr_t *>(arg);
+    std::size_t offset = static_cast<std::size_t>(argc) * sizeof(char *);
+
+    for (int i = 0; i < argc; i++) {
+        std::size_t length = std::strlen(argv[i]) + 1;
+        memcpy(arg + offset, argv[i], length);
+        addr[i] = vm_virt + offset;
+        offset += length;
+    }
+}
+
+process::process(int argc, const char **argv, processlistid::type procltid) :
     m_id(vmcall__create_foreign_process(procltid)),
     m_procltid(procltid),
     m_info_addr(0x00200000UL),
     m_virt_addr(0x00600000UL),
-    m_filename(filename),
-    m_basename(basename(filename)),
+    m_filename(std::string(argv[0])),
+    m_basename(basename(m_filename)),
+    m_argv_size(0x0UL),
+    m_argv(nullptr),
     m_loader{}
 {
     auto ret = 0L;
@@ -146,6 +182,10 @@ process::process(const std::string &filename, processlistid::type procltid) :
     m_crt_info = std::unique_ptr<crt_info>(malloc_aligned<crt_info>(0x1000));
     auto &&crt_info_int = reinterpret_cast<uintptr_t>(m_crt_info.get());
 
+    uintptr_t argv_vm_virt = 0x100000UL;
+    init_argv(argc, argv, argv_vm_virt, 0x1000);
+    auto &&argv_int = reinterpret_cast<uintptr_t>(m_argv.get());
+
     for (const auto &ef : m_elfs)
     {
         section_info_t info = {};
@@ -158,6 +198,17 @@ process::process(const std::string &filename, processlistid::type procltid) :
     }
 
     m_crt_info->program_break = m_virt_addr;
+    m_crt_info->argc = argc;
+    m_crt_info->argv = reinterpret_cast<char **>(argv_vm_virt);
+
+    if (!vmcall__vm_map_foreign_lookup(
+            m_procltid,
+            m_id,
+            argv_vm_virt,
+            argv_int,
+            0x1000,
+            0))
+        throw std::runtime_error("vmcall__vm_map_foreign_lookup failed");
 
     if (!vmcall__vm_map_foreign_lookup(
             m_procltid,

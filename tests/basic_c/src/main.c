@@ -25,9 +25,11 @@
 int
 main(int argc, const char *argv[])
 {
-    (void) argc;
-    (void) argv;
-
     printf("hello world\n");
+
+    for (int i = 0; i < argc; i++) {
+        printf("    argv[%d] = %s\n", i, argv[i]);
+    }
+
     return 0;
 }
